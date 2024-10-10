@@ -1,0 +1,87 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.29"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "Ovinger",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "oving3::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-oving3-Debug-64405c2fa5163b2550e2.json",
+					"name" : "oving3",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "oving4_1::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-oving4_1-Debug-2e9c3354955b35d1d4be.json",
+					"name" : "oving4_1",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "oving4_2::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-oving4_2-Debug-c8ad3c6771f04bdaeae4.json",
+					"name" : "oving4_2",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "oving5::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-oving5-Debug-28b1bda9b00dfe6df328.json",
+					"name" : "oving5",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/Users/jacoblein/Documents/tredjeSemester/AlgDat/Ovinger/cmake-build-debug",
+		"source" : "/Users/jacoblein/Documents/tredjeSemester/AlgDat/Ovinger"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 7
+	}
+}

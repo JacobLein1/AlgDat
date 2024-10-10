@@ -1,0 +1,6 @@
+/Users/jacoblein/Documents/tredjeSemester/AlgDat/Ovinger/cmake-build-debug/CMakeFiles/oving3.dir
+/Users/jacoblein/Documents/tredjeSemester/AlgDat/Ovinger/cmake-build-debug/CMakeFiles/oving4_1.dir
+/Users/jacoblein/Documents/tredjeSemester/AlgDat/Ovinger/cmake-build-debug/CMakeFiles/oving4_2.dir
+/Users/jacoblein/Documents/tredjeSemester/AlgDat/Ovinger/cmake-build-debug/CMakeFiles/oving5.dir
+/Users/jacoblein/Documents/tredjeSemester/AlgDat/Ovinger/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/jacoblein/Documents/tredjeSemester/AlgDat/Ovinger/cmake-build-debug/CMakeFiles/rebuild_cache.dir
