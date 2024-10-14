@@ -78,7 +78,6 @@ graph* reverse_graph(graph* graph) {
       adj_list = adj_list->next;
     }
   }
-
   return reversed_graph;
 }
 
@@ -160,7 +159,7 @@ void dfs(node** table, int start, int* visited, node** order) {
 }
 
 void print_SSK(graph* g) {
-  node** order = NULL; // Head of linked list
+  node* order = NULL; // Head of linked list
 
   // Initialize visited array
   int* visited = malloc(sizeof(int) * g->amt_node);
@@ -192,7 +191,7 @@ void print_SSK(graph* g) {
       continue;
     }
 
-    node** SSK = NULL; // Head of linked list
+    node* SSK = NULL; // Head of linked list
 
     // Perform DFS from current node
     int current_node = current->value;
@@ -224,11 +223,12 @@ void print_SSK(graph* g) {
 
 int main()
 {
-  graph* g = read_file("o5g6.txt");
+  graph* g = read_file("o5g2.txt");
 
   print_SSK(g);
 
   free_graph(g);
+
 
   return 0;
 }
