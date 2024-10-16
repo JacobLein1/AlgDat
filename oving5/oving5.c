@@ -144,9 +144,6 @@ void dfs(node** table, int start, int* visited, node** order) {
   visited[start] = 1;
   // printf("Visited %d\n", start);
 
-  // Add the current node to the order
-  *order = insert_front(*order, start);
-
   // Recur for all the nodes adjacent to this vertex
   node* adj_list = table[start];
   while (adj_list != NULL) {
@@ -156,6 +153,8 @@ void dfs(node** table, int start, int* visited, node** order) {
     }
     adj_list = adj_list->next;
   }
+  // Add the current node to the order
+  *order = insert_front(*order, start);
 }
 
 void print_SSK(graph* g) {
@@ -223,7 +222,7 @@ void print_SSK(graph* g) {
 
 int main()
 {
-  graph* g = read_file("o5g2.txt");
+  graph* g = read_file("o5g5.txt");
 
   print_SSK(g);
 
