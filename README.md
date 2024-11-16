@@ -1,7 +1,7 @@
-**Algoritmer og Datastrukturer - IDATT 2101**
+#Algoritmer og Datastrukturer - IDATT 2101
 Dette repositoriet inneholder alle øvingene for faget Algoritmer og Datastrukturer (IDATT 2101) ved NTNU. Hver øving fokuserer på ulike emner og teknikker innen algoritmer og datastrukturer, med praktiske implementasjoner i Java.
 
-Innhold
+##Innhold
 Hver øving har sin egen mappe og inneholder nødvendig kildekode, testfiler og beskrivelser. Følgende øvinger er inkludert:
 
 Øving 1: Introduksjon til rekursjon og kompleksitetsanalyse.
