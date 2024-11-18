@@ -19,13 +19,16 @@ public class oving7 {
             System.out.println("Locations added to nodes succesfully.");
 
             WeightedGraphList reversedGraph = reverseGraph(weightGraphList);
+            // Test distance table creation with interest points
             List<Integer> interestPointNodeNrs = Arrays.asList(38942, 78888, 109786);
 
-            int[][] distanceTableFrom = createDistanceTableFrom(weightGraphList, interestPointNodeNrs);
-            int[][] distanceTableTo = createDistanceTableFrom(reversedGraph, interestPointNodeNrs);
+            int[][] distanceTableFromLandmark = createDistanceTableFrom(weightGraphList, interestPointNodeNrs);
+            int[][] distanceTableToLandmark = createDistanceTableFrom(reversedGraph, interestPointNodeNrs);
 
-            saveDistanceTableBinary(distanceTableFrom, "distanceTableFrom.bin");
-            saveDistanceTableBinary(distanceTableTo, "distanceTableTo.bin");
+
+
+            saveDistanceTableBinary(distanceTableFromLandmark, "distanceTableFrom.bin");
+            saveDistanceTableBinary(distanceTableToLandmark, "distanceTableTo.bin");
 
             // System.out.println("Special node information of node 1: " + nodeList.get(1).name + " " + nodeList.get(1).placeType);
 
@@ -69,7 +72,7 @@ public static List<Node> readNodeFile(String filename) throws FileNotFoundExcept
             int node = Integer.parseInt(textLine[0]);
             float breddegrad = Float.parseFloat(textLine[1]);
             float lengdegrad = Float.parseFloat(textLine[2]);
-            // Add the node to the priority queue
+            // Add the node to the priority queue, java's priority queue is a min heap but doesnt allow for updating the priority of an element
             Node newNode = new Node(node, breddegrad, lengdegrad);
             nodeList.add(newNode);
             // System.out.println("Node: " + node + " Breddegrad: " + breddegrad + " Lengdegrad: " + lengdegrad);
@@ -83,10 +86,9 @@ public static List<Node> readNodeFile(String filename) throws FileNotFoundExcept
      * Reads a file containing edges between nodes
      * @param filename The name of the file to read
      * @param weightGraphList A graph to add the edges to, must be initialized
-     * @return The graph with the edges added
      * @throws FileNotFoundException If the file is not found
      */
-    public static WeightedGraphList readEdgeFile(String filename, WeightedGraphList weightGraphList) throws FileNotFoundException {
+    public static void readEdgeFile(String filename, WeightedGraphList weightGraphList) throws FileNotFoundException {
 
         try(BufferedReader bufferedReader = new BufferedReader(new FileReader(filename))) {
             String line;
@@ -118,16 +120,13 @@ public static List<Node> readNodeFile(String filename) throws FileNotFoundExcept
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return weightGraphList;
     }
     /**
      * Reads a file containing locations and their names
      * @param filename The name of the file to read
-     * @return A map of locations
      * @throws FileNotFoundException If the file is not found
      */
-    public static Map<Integer, String> readLocationFile(String filename, List<Node> nodeList) throws FileNotFoundException {
-        Map<Integer, String> locationMap = new HashMap<>();
+    public static void readLocationFile(String filename, List<Node> nodeList) throws FileNotFoundException {
 
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(filename))) {
             String line;
@@ -152,7 +151,9 @@ public static List<Node> readNodeFile(String filename) throws FileNotFoundExcept
                     if (nodeList.get(i).nodeNr == nodeNr) {
                         nodeList.get(i).name = name;
                         nodeList.get(i).placeType = placeType;
+                       // System.out.println("Node: " + nodeNr + " Name: " + name + " Place type: " + placeType);
                     }
+
                 }
             }
         } catch (IOException e) {
@@ -160,7 +161,6 @@ public static List<Node> readNodeFile(String filename) throws FileNotFoundExcept
 
         }
 
-        return locationMap;
     }
 
 
@@ -186,7 +186,7 @@ public static List<Node> readNodeFile(String filename) throws FileNotFoundExcept
         public List<Node> getNodeList(){
             return nodeList;
         }
-        public List<Edge> getWeightedGrapList(int node){
+        public List<Edge> getEdges(int node){
             return weightedGraphList.get(node);
         }
 
@@ -206,7 +206,7 @@ public static List<Node> readNodeFile(String filename) throws FileNotFoundExcept
 
         // Loop through all the nodes in the original graph
         for (int fromNode = 0; fromNode < nodeList.size(); fromNode++) {
-            List<Edge> edges = originalGraph.getWeightedGrapList(fromNode);
+            List<Edge> edges = originalGraph.getEdges(fromNode);
 
             for (Edge edge : edges) {
                 // reverse the edge
@@ -237,6 +237,12 @@ public static List<Node> readNodeFile(String filename) throws FileNotFoundExcept
         }
         return interestPointNodeNrs;
     }
+    private static void resetDistanceInWeight(WeightedGraphList weightedGraphList){
+        // Set all node distances to max before finding path
+        for (Node node : weightedGraphList.getNodeList()) {
+            node.distance = Integer.MAX_VALUE;
+        }
+    }
 
     //-----------------------------//
     //           Node              //
@@ -250,8 +256,10 @@ public static List<Node> readNodeFile(String filename) throws FileNotFoundExcept
         private final float breddegrad;
         private final float lengdegrad;
         private int distance = Integer.MAX_VALUE;
+        private double aStarDistance = Integer.MAX_VALUE;
         private int placeType;
         private String name;
+
         /**
          * Creates a new node
          * @param node The node number
@@ -325,7 +333,7 @@ public static List<Node> readNodeFile(String filename) throws FileNotFoundExcept
             // Get the node with the smallest distance
             Node currentNode = priorityQueue.poll();
             // Get the neighbors of the current node
-            List<Edge> neighbors = weightedGraphList.getWeightedGrapList(currentNode.nodeNr);
+            List<Edge> neighbors = weightedGraphList.getEdges(currentNode.nodeNr);
             // Loop through the neighbors
             for (Edge neighbor : neighbors){
                 // Get the node number of the neighbor
@@ -341,6 +349,46 @@ public static List<Node> readNodeFile(String filename) throws FileNotFoundExcept
                 }
             }
         }
+    }
+    public static double dijkstrasPathFinder(WeightedGraphList weightedGraphList, Node startNode, Node goal) {
+        // Create a priority queue, that compares the distance of the nodes
+        PriorityQueue<Node> priorityQueue = new PriorityQueue<>(Comparator.comparingInt(o -> o.distance));
+        // Set the distance of the start node to 0
+        startNode.distance = 0;
+        // Add the start node to the priority queue
+        priorityQueue.add(startNode);
+        Map<Node, Node> cameFrom = new HashMap<>();
+        int count = 0;
+
+        while (!priorityQueue.isEmpty()) {
+            // Get the node with the smallest distance
+            Node currentNode = priorityQueue.poll();
+            count++;
+            if (currentNode.equals(goal)) {
+                List<Node> path = reconstructPath(cameFrom, startNode, goal);
+                System.out.println("Optimal sti: " + path);
+                System.out.println("Anntal noder besøkt: " + count);
+                return currentNode.distance;
+            }
+
+            // Get the neighbors of the current node
+            List<Edge> neighbors = weightedGraphList.getEdges(currentNode.nodeNr);
+            // Loop through the neighbors
+            for (Edge neighbor : neighbors) {
+                // Get the node number of the neighbor
+                int neighborNodeNr = neighbor.to;
+                // Get the distance to the neighbor
+                int distanceToNeighbor = currentNode.distance + neighbor.driveTime;
+                // If the distance to the neighbor is less than the current distance
+                if (distanceToNeighbor < weightedGraphList.getNodeList().get(neighborNodeNr).distance) {
+                    // Set the distance to the neighbor
+                    weightedGraphList.getNodeList().get(neighborNodeNr).distance = distanceToNeighbor;
+                    // Add the neighbor to the priority queue
+                    priorityQueue.add(weightedGraphList.getNodeList().get(neighborNodeNr));
+                }
+            }
+        }
+        return 0;
     }
     // -----------------------------//
     //           Distance table     //
@@ -415,7 +463,90 @@ public static List<Node> readNodeFile(String filename) throws FileNotFoundExcept
             return distanceTable;
         }
     }
+    // euclid heuristic, calculates the euclidean distance between two nodes
+    public static double heuristicLandmark(Node start, Node goal, int landmark, int[][] distanceFromLandmark, int[][] distanceToLandmark) throws IOException {
+        double landmarkToGoal = distanceFromLandmark[goal.nodeNr][landmark];
+        double landmarkToStart = distanceFromLandmark[start.nodeNr][landmark];
+        double nodeToLandmark = distanceToLandmark[start.nodeNr][landmark];
+        double goalToLandmark = distanceToLandmark[goal.nodeNr][landmark];
 
+        return Math.max( Math.max(landmarkToGoal - landmarkToStart, 0) , (nodeToLandmark - goalToLandmark) );
+    }
+public static void aStarPriority(Node node1, Node node2, int[][] distanceTableFromLandmark, int[][] distanceTableToLandmark, int nrLandmarks) throws IOException {
+    // Konverter grader til radianer
+    double b1 = Math.toRadians(node1.breddegrad);
+    double l1 = Math.toRadians(node1.lengdegrad);
+    double b2 = Math.toRadians(node2.breddegrad);
+    double l2 = Math.toRadians(node2.lengdegrad);
+
+    // Beregn differanser for breddegrad og lengdegrad
+    double deltaB = b2 - b1;
+    double deltaL = l2 - l1;
+
+    // Bruk Haversine-formelen
+    double a = Math.pow(Math.sin(deltaB / 2), 2) +
+            Math.cos(b1) * Math.cos(b2) * Math.pow(Math.sin(deltaL / 2), 2);
+    double c = 2 * Math.asin(Math.sqrt(a));
+
+    // Returner avstanden
+    double dist1 = 6371.0 * c;
+
+    double bestDist2 = 0;
+    for (int i = 0; i < nrLandmarks; i++) {
+        double dist2 = heuristicLandmark(node1, node2, i, distanceTableFromLandmark, distanceTableToLandmark);
+        if (dist2 < bestDist2) {
+            bestDist2 = dist2;
+        }
+    }
+
+    node1.distance = (int) (dist1 + bestDist2);
+}
+
+public static double aStar(WeightedGraphList graph, Node start, Node goal, int[][] distanceTableFromLandmark, int[][] distanceTableToLandmark, int nrLandmarks) throws IOException {
+    PriorityQueue<Node> pq = new PriorityQueue<>(Comparator.comparingInt(o -> (int) o.aStarDistance));
+    Map<Node, Node> cameFrom = new HashMap<>();
+    start.aStarDistance = 0;
+    pq.add(start);
+    int count = 0;
+
+    while (!pq.isEmpty()) {
+        count++;
+        Node current = pq.poll();
+        if (current == goal) {
+            break;
+        }
+        List<Edge> neighbors = graph.getEdges(current.nodeNr);
+        for (Edge edge : neighbors) {
+            Node neighbor = graph.getNodeList().get(edge.to);
+            double newDist = current.aStarDistance + edge.driveTime;
+            if (newDist < neighbor.aStarDistance) {
+                neighbor.aStarDistance = newDist;
+                cameFrom.put(neighbor, current);
+                aStarPriority(neighbor, goal, distanceTableFromLandmark, distanceTableToLandmark, nrLandmarks);
+                pq.add(neighbor);
+            }
+        }
+    }
+
+
+    List<Node> path = reconstructPath(cameFrom, start, goal);
+    System.out.println("Optimal sti: " + path);
+    System.out.println("Anntal noder besøkt: " + count);
+    return goal.aStarDistance;
+}
+
+private static List<Node> reconstructPath(Map<Node, Node> cameFrom, Node start, Node goal) {
+    List<Node> path = new ArrayList<>();
+    Node current = goal;
+
+    while (current != null) {
+        path.add(current);
+        current = cameFrom.get(current);
+    }
+
+    Collections.reverse(path); // Snu listen for å få stien fra start til mål
+    return path;
+}
 
 
 }
